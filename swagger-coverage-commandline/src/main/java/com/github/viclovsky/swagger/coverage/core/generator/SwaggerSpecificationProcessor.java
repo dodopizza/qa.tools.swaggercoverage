@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,6 +63,7 @@ public class SwaggerSpecificationProcessor {
         }
         if (enums != null) {
             return ((Stream<Object>) enums.stream())
+                    .filter(Objects::nonNull)
                     .map(o -> o.toString())
                     .collect(Collectors.toList());
         } else {

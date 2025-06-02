@@ -10,6 +10,6 @@ class ParameterUtils {
     }
 
     static Predicate<Parameter> equalsParam(String name, String in) {
-        return p -> (p.getName().equals(name) && p.getIn().equals(in));
+        return p -> (p.getName().equalsIgnoreCase(name) && p.getIn().equals(in));
     }
 }

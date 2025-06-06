@@ -32,6 +32,11 @@ import java.util.stream.Collectors;
 public class CoverageStatisticsBuilder extends StatisticsPreBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(CoverageStatisticsBuilder.class);
 
+    private final AntPathMatcher matcher = new AntPathMatcher();
+    {
+        matcher.setCaseSensitive(false);
+    }
+
     private Map<OperationKey, ConditionOperationCoverage> mainCoverageData;
     private Map<OperationKey, Operation> missed = new TreeMap<>();
     private Map<OperationKey, Operation> deprecated = new TreeMap<>();
@@ -54,12 +59,12 @@ public class CoverageStatisticsBuilder extends StatisticsPreBuilder {
 
             if (keyOptional.isPresent()) {
                 // Recreate path parameters if framework can't parse path parameters to value
-                Map<String, String> extractedPathParams = new AntPathMatcher()
+                Map<String, String> extractedPathParams = matcher
                         .extractUriTemplateVariables(keyOptional.get().getPath(), key.getPath());
                 if (!extractedPathParams.isEmpty()) {
-                    List<Parameter> existedPathParameters = (value.getParameters() != null) 
-                        ? value.getParameters() 
-                        : new ArrayList<>();
+                    List<Parameter> existedPathParameters = (value.getParameters() != null)
+                            ? value.getParameters()
+                            : new ArrayList<>();
 
                     List<String> existedPathParametersNames = existedPathParameters.stream()
                         .filter(parameter -> parameter.getIn().equals("path"))
@@ -67,10 +72,10 @@ public class CoverageStatisticsBuilder extends StatisticsPreBuilder {
                         .collect(Collectors.toList());
 
                     extractedPathParams.forEach((n, v) -> {
-                           if (!existedPathParametersNames.contains(n)) {
-                               value.addParametersItem(new PathParameter().name(n).example(v));
-                               LOGGER.info(String.format("==  result [%s] was also mimicked by absent path param with [name=%s, example=%s]", key, n, v));
-                           }
+                        if (!existedPathParametersNames.contains(n)) {
+                            value.addParametersItem(new PathParameter().name(n).example(v));
+                            LOGGER.info(String.format("==  result [%s] was also mimicked by absent path param with [name=%s, example=%s]", key, n, v));
+                        }
                     });
                 }
 
@@ -88,9 +93,9 @@ public class CoverageStatisticsBuilder extends StatisticsPreBuilder {
         return this;
     }
 
-    private static Predicate<OperationKey> equalsOperationKeys(OperationKey operationKey) {
+    private Predicate<OperationKey> equalsOperationKeys(OperationKey operationKey) {
         return p -> (p.getHttpMethod() == operationKey.getHttpMethod())
-                && new AntPathMatcher().match(p.getPath(), operationKey.getPath());
+                && matcher.match(p.getPath(), operationKey.getPath());
     }
 
     @Override
